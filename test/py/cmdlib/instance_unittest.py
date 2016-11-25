@@ -1899,6 +1899,31 @@ class TestLUInstanceMove(CmdlibTestCase):
     self.ExecOpCodeExpectOpExecError(op, "Errors during disk copy")
 
 
+class TestLUInstanceReinstall(CmdlibTestCase):
+  def setUp(self):
+    super(TestLUInstanceReinstall, self).setUp()
+
+    self.inst = self.cfg.AddNewInstance()
+
+    self.op = opcodes.OpInstanceReinstall(
+      instance_name=self.inst.name,
+      os_type=self.inst.os,
+      osparams=self.inst.osparams
+    )
+
+    self.rpc.call_blockdev_assemble.return_value = \
+      self.RpcResultsBuilder() \
+        .CreateSuccessfulNodeResult(self.master, (None, None, None))
+
+    self.rpc.call_blockdev_shutdown.return_value = \
+      self.RpcResultsBuilder() \
+        .CreateSuccessfulNodeResult(self.master, (None, None))
+
+  def testSimpleReinstall(self):
+    op = self.CopyOpCode(self.op)
+    self.ExecOpCode(op)
+
+
 class TestLUInstanceRename(CmdlibTestCase):
   def setUp(self):
     super(TestLUInstanceRename, self).setUp()
