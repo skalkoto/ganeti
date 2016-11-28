@@ -163,7 +163,7 @@ OPTIONS = [
                  metavar="<OS>",
                  completion_suggest=cli.OPT_COMPL_ONE_OS),
   cli.HYPERVISOR_OPT,
-  cli.OSPARAMS_OPT,
+  cli.OSPARAMS_OPT, cli.CLEAR_OSPARAMS_OPT, cli.REMOVE_OSPARAMS_OPT,
   cli.cli_option("--disk-size", dest="disk_size",
                  help="Disk size (determines disk count)",
                  default="1G", type="string", metavar="<size,size,...>",
@@ -1128,6 +1128,28 @@ class Burner(JobHandler):
     del self.disk_nodes
     del self.instance_nodes
 
+  @_DoBatch(False)
+  def BurnClearOSParams(self):
+    """Clear the OS parameters of an instance."""
+    Log("Clearing all OS parameters")
+    for instance in self.instances:
+      Log("instance %s", instance, indent=1)
+      op = opcodes.OpInstanceSetParams(instance_name=instance,
+                                       clear_osparams=self.opts.clear_osparams)
+      self.ExecOrQueue(instance, [op])
+
+  @_DoBatch(False)
+  def BurnRemoveOSParams(self):
+    """Remove a few OS parameters of an instance."""
+    Log("Removing OS parameters")
+    for instance in self.instances:
+      Log("instance %s", instance, indent=1)
+      op = opcodes.OpInstanceSetParams(
+        instance_name=instance,
+        remove_osparams=self.opts.remove_osparams
+      )
+      self.ExecOrQueue(instance, [op])
+
   def _CheckInstanceAlive(self, instance):
     """Check if an instance is alive by doing http checks.
 
@@ -1215,6 +1237,12 @@ class Burner(JobHandler):
 
       if self.opts.do_reinstall:
         self.BurnReinstall()
+
+      if self.opts.clear_osparams:
+        self.BurnClearOSParams()
+
+      if self.opts.remove_osparams:
+        self.BurnRemoveOSParams()
 
       if self.opts.do_reboot:
         self.BurnReboot()
