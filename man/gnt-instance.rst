@@ -1528,6 +1528,8 @@ REINSTALL
 | [--os-parameters-secret} *OS\_PARAMETERS*]
 | [--clear-os-parameters]
 | [--clear-os-parameters-private]
+| [--remove-os-parameters *param*[,*param*...]]
+| [--remove-os-parameters-private *param*[,*param*...]]
 | [\--submit] [\--print-jobid]
 | {*instance*...}
 
@@ -1544,7 +1546,12 @@ available OS templates. OS parameters can be overridden using ``-O
 The ``--clear-os-parameters`` option will clear all (public) OS
 parameters before executing the reinstall and
 ``--clear-os-parameters-private`` will clear all private OS parameters
-of the instance.
+of the instance. Similarly, the
+``--remove-os-parameters``/``--remove-os-parameters-private`` option
+will clear only the specified public/private parameters and will pass
+the rest to the 'create' command provided by the appropriate OS
+interface (see **ganeti-os-interface**\(7) man page for more
+information).
 
 Since this is a potentially dangerous command, the user will be
 required to confirm this action, unless the ``-f`` flag is passed.

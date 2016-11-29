@@ -398,7 +398,17 @@ def ReinstallInstance(opts, args):
       if not AskUser(usertext):
         return 1
 
+  if opts.clear_osparams and opts.remove_osparams is not None:
+    raise errors.OpPrereqError("Using --remove-os-parameters with "
+      "--clear-os-parameters is not possible", errors.ECODE_INVAL)
+
+  if opts.clear_osparams_private and opts.remove_osparams_private is not None:
+    raise errors.OpPrereqError("Using --remove-os-parameters-private with "
+      "--clear-os-parameters-private is not possible", errors.ECODE_INVAL)
+
   clear_osparams_priv = opts.clear_osparams_private
+  remove_osparams = opts.remove_osparams or []
+  remove_osps_priv = opts.remove_osparams_private or []
 
   jex = JobExecutor(verbose=multi_on, opts=opts)
   for instance_name in inames:
@@ -409,7 +419,9 @@ def ReinstallInstance(opts, args):
                                      osparams_private=opts.osparams_private,
                                      osparams_secret=opts.osparams_secret,
                                      clear_osparams=opts.clear_osparams,
-                                     clear_osparams_private=clear_osparams_priv),
+                                     clear_osparams_private=clear_osparams_priv,
+                                     remove_osparams=remove_osparams,
+                                     remove_osparams_private=remove_osps_priv)
     jex.QueueJob(instance_name, op)
 
   results = jex.WaitOrShow(not opts.submit_only)
@@ -1662,7 +1674,8 @@ commands = {
      m_pri_node_tags_opt, m_sec_node_tags_opt, m_inst_tags_opt, SELECT_OS_OPT]
     + SUBMIT_OPTS + [DRY_RUN_OPT, PRIORITY_OPT, OSPARAMS_OPT,
                      OSPARAMS_PRIVATE_OPT, OSPARAMS_SECRET_OPT,
-                     CLEAR_OSPARAMS_OPT, CLEAR_OSPARAMS_PRIVATE_OPT],
+                     CLEAR_OSPARAMS_OPT, CLEAR_OSPARAMS_PRIVATE_OPT,
+                     REMOVE_OSPARAMS_OPT, REMOVE_OSPARAMS_PRIVATE_OPT],
     "[-f] <instance>", "Reinstall a stopped instance"),
   "remove": (
     RemoveInstance, ARGS_ONE_INSTANCE,
